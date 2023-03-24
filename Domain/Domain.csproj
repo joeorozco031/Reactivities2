@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Disable Nullable so that you don't have to specify with '?' that a string is nullable -->
+    <Nullable>Disable</Nullable>
+  </PropertyGroup>
+
+</Project>

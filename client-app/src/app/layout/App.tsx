@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 // This is an extension that gets installed from https://react.semantic-ui.com/usage
 // For the purpose of not having to use too much html in our components
@@ -12,21 +11,40 @@ import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 
+// used to get an id
 import {v4 as uuid} from 'uuid';
+
+// Our api 
+import agent from '../api/agent';
+import LoadingComponents from './LoadingComponents';
 
 function App() {
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
 
     // We can specify that we are getting back an array of Activity in the axios call.
-    axios.get<Activity[]>('http://localhost:5000/api/activities')
+    // We'll use our api (agent.ts)
+    agent.Activities.list()
     .then(response => {
-      setActivities(response.data);
+
+      let activities: Activity[] = [];
+
+      response.forEach(activity => {
+      activity.date = activity.date.split('T')[0];
+        activities.push(activity);
+      })
+      
+      setActivities(activities);
+      setLoading(false);
+
     })
+
   }, [])  /* Add [] to make the following code run only once. */
 
 
@@ -49,24 +67,46 @@ function App() {
 
   function handleCreateOrEditActivity (activity: Activity) {
 
-    // ... -> loop through activities
+    setSubmitting(true);
+    
+        // ... -> loop through activities
 
-    activity.id 
-    ? setActivities([...activities.filter(x => x.id !== activity.id), activity])
-    : setActivities([...activities, {...activity, id: uuid()}]);
+    if (activity.id){
+      agent.Activities.update(activity).then(() => {
+        setActivities([...activities.filter(x => x.id !== activity.id), activity])
+        setSelectedActivity(activity)
+        setEditMode(false)
+        setSubmitting(false)
+      })
+    }
+    else {
+      activity.id = uuid();
+      agent.Activities.create(activity).then(() => {
+        setActivities([...activities, activity])
+        setSelectedActivity(activity)
+        setEditMode(false)
+        setSubmitting(false)
+      })
+    }
 
-    setEditMode(false);
-    setSelectedActivity(activity);
   }
 
   function handleDeleteActivity (id: string) {
 
-    // Load activities without activity with id passed in parameter
-    // ... -> loop through activities
+    setSubmitting(true);
 
-    setActivities([...activities.filter(x => x.id !== id)]);
+    agent.Activities.delete(id).then(() => {
+
+      // Load thru activities without activity with id passed in parameter
+      // ... -> loop through activities
+
+      setActivities([...activities.filter(x => x.id !== id)]);
+      setSubmitting(false);
+    })
 
   }
+
+  if (loading) return <LoadingComponents content='Loading App' />
 
   return (
 
@@ -91,6 +131,7 @@ function App() {
           closeForm={handleFormClose}
           createOrEdit={handleCreateOrEditActivity}
           deleteActivity={handleDeleteActivity}
+          submitting={submitting}
         />
 
       </Container>

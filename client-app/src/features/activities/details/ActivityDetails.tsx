@@ -1,16 +1,19 @@
 import React from 'react';
 import { Button, Card, Image } from 'semantic-ui-react';
-import { Activity } from '../../../app/models/activity';
+import { useStore } from '../../../app/stores/store';
+import LoadingComponents from '../../../app/layout/LoadingComponents';
 
-interface Props {
-    activity: Activity;
-    cancelSelectActivity: () => void;       //function returns void
-    openForm: (id: string) => void;
 
-}
+export default function ActivityDetails() {
 
-export default function ActivityDetails({activity, cancelSelectActivity, openForm}: Props) {
+    const {activityStore} = useStore();
 
+    // We can de-structure the activity store (to be able to use it's properties)
+    // We can optionally rename a properties using ":"
+    const {selectedActivity: activity, openForm, cancelSelectedActivity} = activityStore;
+
+    if(!activity) return <LoadingComponents />
+    
     return(
 
         <Card fluid>
@@ -27,7 +30,7 @@ export default function ActivityDetails({activity, cancelSelectActivity, openFor
             <Card.Content extra>
                 <Button.Group widths='2'>
                     <Button basic color='blue' content='Edit' onClick={() => openForm(activity.id)} />
-                    <Button onClick={cancelSelectActivity} basic color='grey' content='Cancel' />
+                    <Button onClick={() => cancelSelectedActivity()} basic color='grey' content='Cancel' />
                 </Button.Group>
             </Card.Content>
         </Card>

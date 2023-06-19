@@ -3,10 +3,11 @@ import React from 'react';
 
 import 'semantic-ui-css/semantic.min.css';
 import './app/layout/styles.css';
-import App from './app/layout/App';
 import reportWebVitals from './reportWebVitals';
 import { StoreContext, store } from './app/stores/store';
 import ReactDOM from 'react-dom/client';
+import { router } from './app/router/Routes';
+import { RouterProvider } from 'react-router-dom';
 
 /* ReactDOM.render(
 
@@ -34,8 +35,11 @@ root.render(
 
    // We'll be providing our context to our application
   // where all of our states will be stored and be able to be access by our components
+  
+  // Also, we are not going to be using our <App > component directly, but use routes defined in Routes.tsx
+
   <StoreContext.Provider value={store}>
-    <App />
+      <RouterProvider router={router} />
   </StoreContext.Provider>,
 
 );
